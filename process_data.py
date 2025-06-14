@@ -27,7 +27,7 @@ def load_record_txt(metaname):
 
 def train_tokenizer(all_metas):
     tokenizer=Tokenizer(BPE())
-    trainer=BpeTrainer(vocab_size=10000,special_tokens=['[UNK]','[PAD]','[BOS]','[EOS]'])
+    trainer=BpeTrainer(vocab_size=1000,special_tokens=['[UNK]','[PAD]','[BOS]','[EOS]'])
     def iter_all_txt():
         for metaname in all_metas:
             yield load_record_txt(metaname)
