@@ -53,14 +53,16 @@ def process_data(all_metas,tokenizer):
             text=fp.readline().split(':')[1].strip()
             tokens=tokenizer.encode(f'[BOS]{text}[EOS]')
         wav_filename=mp4_filename.replace('.mp4','.wav')
-        ff=ffmpy.FFmpeg(inputs={mp4_filename:None},outputs={wav_filename:None})
-        ff.run()
+        if not os.path.exists(wav_filename): 
+            ff=ffmpy.FFmpeg(inputs={mp4_filename:None},outputs={wav_filename:None})
+            ff.run()
         waveform,sample_rate=torchaudio.load(wav_filename,backend='soundfile')  # pip install PySoundFile on windows, pip install soundfile on linux
         audio_features=torchaudio.compliance.kaldi.fbank(waveform*32768,num_mel_bins=80) # waveform first reverted to int16(single channel)
         print(f'filename:{wav_filename} waveform:{waveform.shape} sample_rate:{sample_rate} audio_features:{audio_features.shape}')
         os.makedirs(os.path.dirname(sample_file),exist_ok=True)
         sample={'audio_features':audio_features,'sample_rate':sample_rate,'tokens':tokens}
         torch.save(sample,sample_file)
+        samples+=1
     return samples
     
 if __name__=='__main__':
