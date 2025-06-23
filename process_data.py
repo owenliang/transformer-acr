@@ -25,21 +25,30 @@ def load_record_txt(metaname):
         text=fp.readline().split(':')[1].strip()
     return text
 
-def train_tokenizer(all_metas):
+def train_tokenizer(all_metas,tokenizer_file):
     tokenizer=Tokenizer(BPE())
-    trainer=BpeTrainer(vocab_size=1000,special_tokens=['[UNK]','[PAD]','[BOS]','[EOS]'])
+    trainer=BpeTrainer(vocab_size=500,special_tokens=['[UNK]','[PAD]','[BOS]','[EOS]'])
     def iter_all_txt():
         for metaname in all_metas:
             yield load_record_txt(metaname)
     tokenizer.train_from_iterator(iter_all_txt(),trainer=trainer,length=len(all_metas))
+    tokenizer.save(tokenizer_file,pretty=True)
     return tokenizer
 
 def load_sample(metaname):
     sample_file=f'dataset/{metaname}.pt'
     return torch.load(sample_file)
 
-def load_tokenizer():
-    return Tokenizer.from_file('tokenizer.json')
+def load_tokenizer(tokenizer_file='tokenizer.json'):
+    return Tokenizer.from_file(tokenizer_file)
+
+def decode(tokenizer,token_ids):
+    tokens=[]
+    for token_id in token_ids:
+        token=tokenizer.id_to_token(token_id)
+        if token not in ['[UNK]','[PAD]','[BOS]','[EOS]']:
+            tokens.append(token)
+    return ''.join(tokens)
 
 def process_data(all_metas,tokenizer):
     samples=0
@@ -73,12 +82,12 @@ if __name__=='__main__':
     print(f'train_metas:{len(train_metas)} val_metas:{len(val_metas)} test_metas:{len(test_metas)} all_metas:{len(all_metas)}')
     
     # train tokenizer
-    if not os.path.exists('tokenizer.json'):
-        tokenizer=train_tokenizer(all_metas)
-        tokenizer.save('tokenizer.json',pretty=True)
+    tokenizer_file='tokenizer.json'
+    if not os.path.exists(tokenizer_file):
+        tokenizer=train_tokenizer(all_metas,tokenizer_file)
     else:
-        tokenizer=Tokenizer.from_file('tokenizer.json')
-    print(f'tokenizer vocab_size:{tokenizer.get_vocab_size()} encode("hello world"): {tokenizer.encode("hello world")}')    
+        tokenizer=load_tokenizer(tokenizer_file)
+    print(f'tokenizer vocab_size:{tokenizer.get_vocab_size()}')    
     
     # pre-process data
     samples=process_data(all_metas,tokenizer)
