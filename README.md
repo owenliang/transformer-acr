@@ -1,5 +1,10 @@
 # transformer-asr
 
+ASR Model based on Transformer with Pytorch.
+
+## Swanlab
+
+[Swanlab Training Chart](https://swanlab.cn/@owenliang/transformer-asr/runs/v82evkjj682vc5uju33jo/chart) 
 
 ## Dataset
 LRS2 dataset: https://aistudio.baidu.com/datasetdetail/228857
